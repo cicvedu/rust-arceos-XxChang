@@ -53,6 +53,7 @@ impl ByteAllocator for SimpleByteAllocator {
             self.next = start + size;
             Ok(NonZeroUsize::new(start).unwrap())
         }
+        
     }
 
     fn dealloc(&mut self, _pos: NonZeroUsize, _layout: Layout) {
