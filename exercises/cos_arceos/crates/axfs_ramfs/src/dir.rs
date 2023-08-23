@@ -165,8 +165,22 @@ impl VfsNodeOps for DirNode {
         }
     }
 
-    fn rename(&self, _src: &str, _dst: &str) -> VfsResult {
-        todo!("Implement rename for ramfs!");
+    fn rename(&self, src: &str, dst: &str) -> VfsResult {
+        let (_, rest) = split_path(dst);
+        let (src_name, _) = split_path(src);
+        if self.exist(src_name) {
+            let src_node = self.children.read().get(src_name).cloned().unwrap();
+            if src_node.get_attr().unwrap().is_file() {
+                self.children.write().insert(String::from(rest.unwrap()), src_node);
+                log::warn!("{:?}", self.get_entries());
+                self.children.write().remove(src_name).unwrap();
+                Ok(())
+            } else {
+                Err(VfsError::IsADirectory)
+            }
+        } else {
+            Err(VfsError::InvalidInput)
+        }
     }
 
     axfs_vfs::impl_vfs_dir_default! {}
